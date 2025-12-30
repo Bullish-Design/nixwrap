@@ -1,4 +1,3 @@
-# template/flake.nix
 {
   description = "Nix wrapper package with devenv.sh integration";
 

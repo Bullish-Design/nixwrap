@@ -8,9 +8,6 @@
 ```bash
 # Create project directory
 mkdir my-package-nix && cd my-package-nix
-
-# Initialize from template
-nix flake init -t github:your-org/nix-devenv-wrapper
 ```
 
 ### 2. Configure Your Package
@@ -161,9 +158,6 @@ Inside `devenv shell`:
 
 | Command | Description |
 |---------|-------------|
-| `check-update` | Check if newer version exists upstream |
-| `update-version` | Update to latest version |
-| `update-version X.Y.Z` | Update to specific version |
 | `build` | Build the nix package |
 | `test-build` | Build and run version check |
 

@@ -23,9 +23,7 @@ pip install nix-devenv-wrapper
 
 ```bash
 mkdir my-wrapper && cd my-wrapper
-cp -r /path/to/nixwrap/template/* .
-
-# Edit wrapper.toml
+# Create and edit wrapper.toml in your project
 ndw init
 ```
 

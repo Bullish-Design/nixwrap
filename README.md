@@ -1,102 +1,80 @@
-# nixwrap (nix-devenv-wrapper)
+# nixwrap
 
-`nixwrap` is a Python library that wraps packages from registries (npm, PyPI) as Nix flakes with optional `devenv.sh`
-automation. It provides a TOML-driven configuration model, generators for Nix files, and a small CLI to keep wrapper
-flakes updated.
+`nixwrap` is a TOML-driven tool for generating Nix packaging and devenv setup from a single `nixwrap.toml`. It produces
+`nixwrap.nix`, an optional `flake.nix`, and a structured `devenv.nix` output so you can keep wrapper repos tidy and
+repeatable.
 
 ## Features
 
-- **Registry support**: npm and PyPI (cargo/GitHub releases planned)
-- **Config-driven**: single `wrapper.toml` becomes `package.nix`, `flake.nix`, and `devenv.nix`
-- **Updater tooling**: fetch latest versions + update hashes
-- **CLI**: `ndw` to initialize, generate, and update wrappers
+- **Config-driven**: `nixwrap.toml` is the single source of truth
+- **Generated outputs**: `nixwrap.nix`, `flake.nix`, and `devenv.nix`
+- **Simple CLI**: `nixwrap init/generate/flake/validate`
 
 ## Installation
 
 ```bash
-uv add nix-devenv-wrapper
+uv add nixwrap
 # or
-pip install nix-devenv-wrapper
+pip install nixwrap
 ```
 
 ## Quick Start
 
 ```bash
 mkdir my-wrapper && cd my-wrapper
-# Create and edit wrapper.toml in your project
-ndw init
+nixwrap init
+
+# Edit nixwrap.toml, then regenerate outputs
+nixwrap generate
 ```
 
-## Flake import example
+## Output layout (devenv pattern)
 
-Use nixwrap as a flake input (mirroring the devman example) and pass the inputs to your module:
+`nixwrap generate` writes a structured `devenv.nix` under `nix/` and a thin root-level shim:
+
+```
+.
+├── nixwrap.toml
+├── nixwrap.nix
+├── flake.nix
+├── nix/
+│   └── devenv.nix         # generated content
+└── devenv.nix             # imports ./nix/devenv.nix
+```
+
+## Flake + nixwrap.nix integration snippet
+
+Use `nixwrap.nix` directly from your `flake.nix` outputs:
 
 ```nix
 {
-  description = "Terminal-only Home Manager profile - Pulls in Neovim config from another repo";
+  description = "My wrapped CLI";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-
-    nixvim = {
-      url = "github:Bullish-Design/nixvim/main";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    devman = {
-      url = "github:Bullish-Design/devman/nixos";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    nixwrap = {
-      url = "github:your-org/nixwrap";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
-  outputs = { self, nixvim, devman, nixwrap, ... }: {
-    homeManagerModules.terminal = import ./modules/terminal.nix {
-      inherit nixvim devman nixwrap;
+  outputs = { self, nixpkgs, ... }:
+    let
+      systems = [ "x86_64-linux" "aarch64-darwin" ];
+      forAllSystems = nixpkgs.lib.genAttrs systems;
+      nixwrapOutputs = import ./nixwrap.nix { inherit nixpkgs systems; };
+    in
+    {
+      packages = forAllSystems nixwrapOutputs.packages;
+      devShells = forAllSystems nixwrapOutputs.devShells;
     };
-  };
 }
-```
-
-## Library Usage
-
-```python
-from nix_devenv_wrapper.config import load_config
-from nix_devenv_wrapper.updater import Updater
-
-config = load_config("wrapper.toml")
-updater = Updater(config)
-
-result = updater.check_for_updates()
-print(f"Update available: {result.update_available}")
-
-result = updater.update_to_version()
-print(f"Updated to {result.latest_version}")
 ```
 
 ## CLI Usage
 
 ```bash
-ndw check                    # Check for updates
-ndw update                   # Update to latest
-ndw update -v 1.2.3          # Update to specific version
-ndw init                     # Initialize nix files from config
-ndw generate                 # Regenerate all nix files
-ndw generate package         # Regenerate package.nix only
+nixwrap init                 # Create nixwrap.toml and scaffolding
+nixwrap generate             # Regenerate nixwrap.nix + devenv.nix
+nixwrap flake                # Generate/update flake.nix wrapper
+nixwrap validate             # Validate nixwrap.toml
 ```
-
-## Supported Registries
-
-| Registry | Status |
-|----------|--------|
-| npm | ✅ Supported |
-| PyPI | ✅ Supported |
-| Cargo | 🚧 Planned |
-| GitHub Releases | 🚧 Planned |
 
 ## License
 

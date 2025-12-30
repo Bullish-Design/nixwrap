@@ -1,5 +1,5 @@
 # USER.md
-# nix-devenv-wrapper User Guide
+# nixwrap User Guide
 
 ## Quick Start
 
@@ -9,33 +9,33 @@
 # Create project directory
 mkdir my-package-nix && cd my-package-nix
 
-# Initialize from template
-nix flake init -t github:your-org/nix-devenv-wrapper
+# Initialize nixwrap scaffolding
+nixwrap init
 ```
 
 ### 2. Configure Your Package
 
-Edit `wrapper.toml`:
+Edit `nixwrap.toml`:
 
 ```toml
-flake_name = "my-cli"
+name = "my-cli"
 
-[source]
-registry = "npm"                    # npm or pypi
-name = "@scope/package-name"        # Package name in registry
+[package]
+version = "1.2.3"
+src = "github:your-org/my-cli?ref=v1.2.3"
 
 [runtime]
-type = "nodejs"                     # nodejs or python
-nix_package = "nodejs_22"           # Nix package for runtime
+type = "nodejs"
+nix_package = "nodejs_22"
 
 [wrapper]
-binary_name = "mycli"               # Command users will run
-entry_point = "cli.js"              # Main entry point
+binary_name = "mycli"
+entry_point = "cli.js"
 
 [meta]
 description = "My CLI tool"
 homepage = "https://example.com"
-license = "mit"                     # Nix license identifier
+license = "mit"
 ```
 
 ### 3. Generate and Build
@@ -45,7 +45,7 @@ license = "mit"                     # Nix license identifier
 devenv shell
 
 # Generate nix files from config
-ndw init
+nixwrap generate
 
 # Build the package
 nix build
@@ -74,24 +74,18 @@ home.packages = [ inputs.my-package-nix.packages.${system}.default ];
 
 ## Configuration Reference
 
-### wrapper.toml Structure
+### nixwrap.toml Structure
 
 ```toml
 # Required: Name used in flake outputs
-flake_name = "package-name"
+name = "package-name"
 
-# Optional: Enable devenv.sh integration (default: true)
-devenv_enabled = true
-
-[source]
-# Required: Registry type
-registry = "npm"  # "npm" | "pypi"
-
-# Required: Package name in registry
-name = "@scope/package"
-
-# Optional: Pin to specific version (omit for latest)
+[package]
+# Required: Version for your wrapper
 version = "1.2.3"
+
+# Required: Source reference (git, flake, or local path)
+src = "github:your-org/package?ref=v1.2.3"
 
 [runtime]
 # Required: Runtime type
@@ -110,9 +104,6 @@ binary_name = "mycli"
 # Required: Entry point file
 entry_point = "cli.js"
 
-# Optional: Disable upstream auto-updater (default: true)
-disable_auto_update = true
-
 # Optional: Node.js flags (nodejs only)
 node_flags = ["--no-warnings", "--enable-source-maps"]
 
@@ -129,51 +120,17 @@ homepage = "https://example.com"
 # Optional: Nix license identifier (default: "unfree")
 license = "mit"
 
-# Optional: Override main program name
-main_program = "mycli"
-
 # Optional: Platform support (default: "platforms.all")
 platforms = "platforms.linux"
-
-[cachix]
-# Optional: Cachix cache name
-name = "my-cache"
-
-# Optional: Public key for cache
-public_key = "my-cache.cachix.org-1:..."
-
-[github_actions]
-# Optional: Cron schedule for update checks (default: hourly)
-update_cron = "0 * * * *"
-
-# Optional: Auto-merge update PRs (default: true)
-auto_merge = true
-
-# Optional: CI platforms
-test_platforms = ["ubuntu-latest", "macos-latest"]
 ```
 
 ---
 
-## Development Commands
-
-Inside `devenv shell`:
-
-| Command | Description |
-|---------|-------------|
-| `check-update` | Check if newer version exists upstream |
-| `update-version` | Update to latest version |
-| `update-version X.Y.Z` | Update to specific version |
-| `build` | Build the nix package |
-| `test-build` | Build and run version check |
-
-### CLI Tool (ndw)
+## CLI Tool
 
 ```bash
-ndw check                    # Check for updates
-ndw update                   # Update to latest
-ndw update -v 1.2.3          # Update to specific version
-ndw init                     # Initialize nix files from config
-ndw generate                 # Regenerate all nix files
-ndw generate package         # Regenerate package.nix only
+nixwrap init                 # Create nixwrap.toml and scaffolding
+nixwrap generate             # Regenerate nixwrap.nix + devenv.nix
+nixwrap flake                # Generate/update flake.nix wrapper
+nixwrap validate             # Validate nixwrap.toml
 ```

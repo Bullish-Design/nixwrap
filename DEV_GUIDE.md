@@ -27,8 +27,8 @@ nix-devenv-wrapper/
 │   └── cli/                  # Command-line interface
 │       ├── __init__.py
 │       └── main.py           # CLI entry point
-├── template/                 # User-facing template files
-└── scripts/                  # Update scripts
+├── devenv.nix                # Example devenv.nix
+└── flake.nix                 # Example flake.nix
 ```
 
 ## Core Concepts

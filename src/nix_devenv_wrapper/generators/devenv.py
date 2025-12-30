@@ -36,8 +36,6 @@ def generate_devenv_nix(config: FlakeConfig) -> str:
           }};
 
           scripts = {{
-            check-update.exec = "uv run scripts/check_update.py";
-            update-version.exec = "uv run scripts/update_version.py $@";
             build.exec = "nix build --print-build-logs";
             test-build.exec = ''
               nix build --print-build-logs
@@ -50,8 +48,6 @@ def generate_devenv_nix(config: FlakeConfig) -> str:
             echo "🔧 Development environment ready"
             echo ""
             echo "Commands:"
-            echo "  check-update   - Check for new upstream versions"
-            echo "  update-version - Update to latest (or specify version)"
             echo "  build          - Build the nix package"
             echo "  test-build     - Build and verify version output"
             echo ""

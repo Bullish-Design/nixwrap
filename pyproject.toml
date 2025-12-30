@@ -1,7 +1,7 @@
 [project]
-name = "nix-devenv-wrapper"
-version = "0.1.0"
-description = "Wrap packages from registries as NixOS flakes with devenv.sh integration."
+name = "nixwrap"
+version = "0.2.0"
+description = "Wrap packages from registries as NixOS flakes with env tooling integration."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -9,12 +9,11 @@ authors = [
   { name = "Nixwrap Contributors" }
 ]
 dependencies = [
-  "httpx>=0.25",
   "pydantic>=2.0"
 ]
 
 [project.scripts]
-ndw = "nix_devenv_wrapper.cli.main:main"
+nixwrap = "nixwrap.cli.main:main"
 
 [tool.ruff]
 line-length = 120
@@ -23,4 +22,3 @@ line-length = 120
 python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
-

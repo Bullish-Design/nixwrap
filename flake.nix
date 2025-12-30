@@ -1,51 +1,32 @@
-# template/flake.nix
 {
-  description = "Nix wrapper package with devenv.sh integration";
+  description = "nixwrap";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    devenv.url = "github:cachix/devenv";
   };
 
-  nixConfig = {
-    extra-trusted-public-keys = "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=";
-    extra-substituters = "https://devenv.cachix.org";
-  };
-
-  outputs = { self, nixpkgs, flake-utils, devenv }@inputs:
-    let
-      overlay = final: prev: {
-        # Package name will be replaced during init
-        wrapped-package = final.callPackage ./package.nix { };
-      };
-    in
+  outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs {
-          inherit system;
-          config.allowUnfree = true;
-          overlays = [ overlay ];
+        pkgs = import nixpkgs { inherit system; };
+        nixwrap = pkgs.python311Packages.buildPythonApplication {
+          pname = "nixwrap";
+          version = "0.1.0";
+          pyproject = true;
+          src = ./.;
+          propagatedBuildInputs = with pkgs.python311Packages; [
+            httpx
+            pydantic
+          ];
         };
       in
       {
-        packages = {
-          default = pkgs.wrapped-package;
-          wrapped-package = pkgs.wrapped-package;
-        };
+        packages.default = nixwrap;
 
-        apps = {
-          default = {
-            type = "app";
-            program = "${pkgs.wrapped-package}/bin/binary-name";
-          };
+        apps.default = {
+          type = "app";
+          program = "${nixwrap}/bin/ndw";
         };
-
-        devShells.default = devenv.lib.mkShell {
-          inherit inputs pkgs;
-          modules = [ ./devenv.nix ];
-        };
-      }) // {
-        overlays.default = overlay;
-      };
+      });
 }

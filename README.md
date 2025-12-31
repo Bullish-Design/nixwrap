@@ -1,12 +1,12 @@
 # nixwrap (nix-devenv-wrapper)
 
-`nixwrap` is a Python library that wraps packages from registries (npm, PyPI) as Nix flakes with optional `devenv.sh`
+`nixwrap` is a Python library that wraps packages from registries (npm, PyPI, GitHub releases) as Nix flakes with optional `devenv.sh`
 automation. It provides a TOML-driven configuration model, generators for Nix files, and a small CLI to keep wrapper
 flakes updated.
 
 ## Features
 
-- **Registry support**: npm and PyPI (cargo/GitHub releases planned)
+- **Registry support**: npm, PyPI, and GitHub releases (cargo planned)
 - **Config-driven**: single `wrapper.toml` becomes `package.nix`, `flake.nix`, and `devenv.nix`
 - **Updater tooling**: fetch latest versions + update hashes
 - **CLI**: `ndw` to initialize, generate, and update wrappers
@@ -97,8 +97,27 @@ ndw generate package         # Regenerate package.nix only
 |----------|--------|
 | npm | ✅ Supported |
 | PyPI | ✅ Supported |
+| GitHub Releases | ✅ Supported |
 | Cargo | 🚧 Planned |
-| GitHub Releases | 🚧 Planned |
+
+### GitHub Releases
+
+To wrap a GitHub release, set `registry = "github_release"` and use the format `owner/repo` for the package name:
+
+```toml
+[source]
+registry = "github_release"
+name = "user/project"
+# version = "1.0.0"  # Omit for latest release
+```
+
+The GitHub registry client will:
+- Fetch release information from the GitHub API
+- Support both `v1.0.0` and `1.0.0` tag formats
+- Download source tarballs for the specified version
+- Work with or without authentication (token optional for higher rate limits)
+
+See `examples/github-release-wrapper.toml` for a complete example.
 
 ## License
 

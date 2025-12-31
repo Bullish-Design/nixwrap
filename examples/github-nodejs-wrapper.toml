@@ -1,0 +1,29 @@
+# Example wrapper.toml for wrapping a Node.js project from GitHub releases
+# This example shows how to wrap a Node.js application distributed via GitHub releases
+
+flake_name = "node-app"
+devenv_enabled = true
+
+[source]
+registry = "github_release"
+name = "user/node-app"  # Format: owner/repo
+# version = "2.1.0"  # Omit to use latest release
+
+[runtime]
+type = "nodejs"
+nix_package = "nodejs_22"
+# extra_packages = []
+
+[wrapper]
+binary_name = "node-app"
+entry_point = "dist/index.js"  # Path to the entry point within the release
+disable_auto_update = true
+node_flags = ["--no-warnings", "--enable-source-maps"]
+# env_vars = { NODE_ENV = "production" }
+
+[meta]
+description = "Node.js application from GitHub releases"
+homepage = "https://github.com/user/node-app"
+license = "mit"
+# main_program = "node-app"
+# platforms = "platforms.all"

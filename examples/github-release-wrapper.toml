@@ -1,0 +1,39 @@
+# Example wrapper.toml for wrapping a GitHub release
+# This example shows how to wrap a GitHub release as a Nix flake
+
+flake_name = "example-tool"
+devenv_enabled = true
+
+[source]
+registry = "github_release"
+name = "owner/repo"  # Format: owner/repo
+# version = "1.0.0"  # Omit to use latest release
+
+[runtime]
+type = "none"  # Use "nodejs", "python", or "none" for compiled binaries
+nix_package = "bash"  # Required even for type="none"
+# extra_packages = ["libffi", "openssl"]  # Additional dependencies
+
+[wrapper]
+binary_name = "example-tool"
+entry_point = "bin/example-tool"  # Path to the binary within the release
+disable_auto_update = true
+# env_vars = { SOME_VAR = "value" }
+
+[meta]
+description = "Example tool from GitHub releases"
+homepage = "https://github.com/owner/repo"
+license = "mit"
+# main_program = "example-tool"  # defaults to binary_name
+# platforms = "platforms.all"
+
+# Optional: Cachix binary cache
+# [cachix]
+# name = "example-tool"
+# public_key = "example-tool.cachix.org-1:..."
+
+# Optional: GitHub Actions automation
+# [github_actions]
+# update_cron = "0 0 * * *"  # Daily at midnight
+# auto_merge = true
+# test_platforms = ["ubuntu-latest", "macos-latest"]

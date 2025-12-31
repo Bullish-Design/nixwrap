@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from nix_devenv_wrapper.models import PackageRegistry
 from nix_devenv_wrapper.registries.base import RegistryClient
+from nix_devenv_wrapper.registries.github import GitHubRegistry
 from nix_devenv_wrapper.registries.npm import NpmRegistry
 from nix_devenv_wrapper.registries.pypi import PyPIRegistry
 
@@ -14,5 +15,7 @@ def get_registry(registry_type: PackageRegistry) -> RegistryClient:
             return NpmRegistry()
         case PackageRegistry.PYPI:
             return PyPIRegistry()
+        case PackageRegistry.GITHUB_RELEASE:
+            return GitHubRegistry()
         case _:
             raise NotImplementedError(f"Registry {registry_type} not yet implemented")
